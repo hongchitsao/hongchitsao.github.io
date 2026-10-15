@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紅旗老師的 AI 教學天地</title>
+<style>
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:linear-gradient(#9fdcff 0%, #d8f3ff 40%, #fff6d9 100%);
+    min-height:100vh; color:#4a3728; overflow-x:hidden;
+  }
+  .cloud{position:fixed; background:#fff; border-radius:50px; opacity:.85; z-index:0;
+    animation:drift 14s ease-in-out infinite alternate;}
+  .cloud::before,.cloud::after{content:""; position:absolute; background:#fff; border-radius:50%;}
+  .c1{width:120px; height:38px; top:8%; left:6%;}
+  .c1::before{width:52px; height:52px; top:-24px; left:18px;}
+  .c1::after{width:36px; height:36px; top:-16px; left:62px;}
+  .c2{width:150px; height:44px; top:20%; right:5%; animation-delay:-5s;}
+  .c2::before{width:62px; height:62px; top:-30px; left:24px;}
+  .c2::after{width:42px; height:42px; top:-20px; left:80px;}
+  .c3{width:100px; height:32px; top:55%; left:10%; animation-delay:-9s;}
+  .c3::before{width:44px; height:44px; top:-20px; left:14px;}
+  .c3::after{width:30px; height:30px; top:-14px; left:52px;}
+  @keyframes drift{from{transform:translateX(-18px);} to{transform:translateX(18px);}}
+  .rainbow{height:14px; border-radius:0 0 14px 14px;
+    background:linear-gradient(90deg,#ff6b6b,#ffa94d,#ffd43b,#69db7c,#4dabf7,#b197fc);}
+  .wrap{max-width:720px; margin:0 auto; padding:20px 16px 40px; position:relative; z-index:1;}
+  h1{margin:14px 0 4px; text-align:center; font-size:clamp(30px,7vw,46px); color:#e8590c;
+    text-shadow:2px 2px 0 #fff, -2px 2px 0 #fff, 2px -2px 0 #fff, -2px -2px 0 #fff, 0 5px 0 rgba(0,0,0,.08);
+    letter-spacing:2px;}
+  .sub{text-align:center; font-size:18px; font-weight:700; color:#5c7cfa; margin:0 0 18px;}
+  .card{background:#fff; border:4px solid; border-radius:24px; padding:18px; margin:16px 0;
+    box-shadow:0 6px 0 rgba(0,0,0,.12);}
+  .card.game{border-color:#ffa94d;}
+  .card.qr{border-color:#4dabf7; text-align:center;}
+  .card.more{border-color:#b197fc; text-align:center; border-style:dashed;}
+  .badge{display:inline-block; background:#ffd43b; border-radius:20px; padding:4px 14px;
+    font-size:14px; font-weight:900; color:#7a4d00; margin-bottom:8px;}
+  .game-title{font-size:24px; font-weight:900; margin:4px 0;}
+  .game-desc{font-size:16px; line-height:1.7; margin:6px 0 14px;}
+  .btn{display:inline-block; text-decoration:none; color:#fff; font-size:22px; font-weight:900;
+    background:linear-gradient(#ffa94d,#f76707); border-radius:999px; padding:14px 44px;
+    box-shadow:0 5px 0 #b65000; border:3px solid #fff;}
+  .btn:active{transform:translateY(4px); box-shadow:0 1px 0 #b65000;}
+  .qr img{width:220px; height:220px; border:6px solid #4dabf7; border-radius:18px; background:#fff;}
+  .qr p{font-size:17px; font-weight:700; margin:10px 0 0;}
+  footer{text-align:center; font-size:13px; color:#8a7a66; margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+<div class="rainbow"></div>
+<div class="wrap">
+  <h1>紅旗老師的 AI 教學天地</h1>
+  <p class="sub">小朋友，來玩遊戲、學數學！</p>
+
+  <div class="card game">
+    <span class="badge">五年級數學・線對稱圖形</span>
+    <div class="game-title">寶藏獵人：失落的藏寶圖</div>
+    <p class="game-desc">海盜的藏寶圖只剩一半！把對稱的另一半畫出來，補完整張圖，找到大寶藏。全5關等你挑戰！</p>
+    <a class="btn" href="https://hongchitsao.github.io/line-symmetry-game/">開始玩</a>
+  </div>
+
+  <div class="card qr">
+    <span class="badge" style="background:#d0ebff; color:#1864ab;">上課用平板掃我</span>
+    <div class="qr">
+      <img src="qrcode.png" alt="網站首頁 QR code">
+      <p>掃描進入紅旗老師的 AI 教學天地</p>
+    </div>
+  </div>
+
+  <div class="card more">
+    <div class="game-title" style="font-size:20px;">更多遊戲準備中…</div>
+    <p class="game-desc">紅旗老師會繼續做好玩的學習遊戲，敬請期待！</p>
+  </div>
+
+  <footer>紅旗老師的 AI 教學天地・給小學生玩中學</footer>
+</div>
+</body>
+</html>
