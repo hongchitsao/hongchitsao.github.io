@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教室後台｜紅旗老師的 AI 教學天地</title>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:#f1f3f5; color:#343a40; padding:16px;}
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:24px; margin:6px 0;}
+  h1 a{font-size:15px; font-weight:400;}
+  .panel{background:#fff; border-radius:14px; padding:14px; margin:12px 0;
+    box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .filters{display:flex; gap:10px; flex-wrap:wrap; align-items:end;}
+  .filters label{font-size:14px; font-weight:700; display:flex; flex-direction:column; gap:4px;}
+  .filters input{font-size:16px; padding:8px 10px; border:2px solid #adb5bd; border-radius:10px;}
+  .btn{font-size:16px; font-weight:700; padding:9px 18px; border-radius:10px; cursor:pointer;
+    border:2px solid #1864ab; background:#4dabf7; color:#fff;}
+  .btn.ghost{background:#fff; color:#1864ab;}
+  #gate{position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex;
+    align-items:center; justify-content:center; z-index:50;}
+  #gate .box{background:#fff; border-radius:16px; padding:26px; width:min(360px,90vw); text-align:center;}
+  #gate input{font-size:20px; padding:10px; width:180px; text-align:center;
+    border:3px solid #adb5bd; border-radius:10px; letter-spacing:6px;}
+  #gateMsg{min-height:26px; color:#d6336c; font-weight:700;}
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  th,td{border-bottom:1px solid #dee2e6; padding:8px 6px; text-align:center; vertical-align:middle;}
+  th{background:#e7f5ff;}
+  .mini{display:inline-grid; grid-template-columns:repeat(12, 8px); gap:1px;
+    background:#adb5bd; padding:3px; border-radius:4px;}
+  .mini i{width:8px; height:8px; background:#fff; display:block;}
+  .mini i.g{background:#212529;} .mini i.s{background:#2a9d8f;}
+  .mini i.w{background:#fa5252;} .mini i.m{background:#fff; outline:2px solid #fab005; outline-offset:-2px;}
+  .count{font-size:13px; color:#868e96; margin:6px 0;}
+  .legend{font-size:13px; color:#495057;}
+  .dot{display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 3px 0 10px;}
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="box">
+    <h2 style="margin-top:0;">教室後台（老師專用）</h2>
+    <p>請輸入老師密碼</p>
+    <input type="password" id="pw" maxlength="20" autocomplete="off"><br><br>
+    <button class="btn" onclick="unlock()">進入</button>
+    <div id="gateMsg"></div>
+    <p><a href="index.html">回首頁</a></p>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>教室後台・錯題紀錄 <a href="index.html">回首頁</a></h1>
+  <div class="panel">
+    <div class="filters">
+      <label>班級<input id="fClass" placeholder="例如 501"></label>
+      <label>姓名<input id="fName" placeholder="學生姓名"></label>
+      <label>日期<input id="fDate" type="date"></label>
+      <button class="btn" onclick="load()">查詢</button>
+      <button class="btn ghost" onclick="clearF()">清除</button>
+    </div>
+    <div class="legend" style="margin-top:8px;">
+      <span class="dot" style="background:#212529;"></span>題目
+      <span class="dot" style="background:#2a9d8f;"></span>學生畫對
+      <span class="dot" style="background:#fa5252;"></span>多畫
+      <span class="dot" style="background:#fff;border:2px solid #fab005;"></span>漏畫
+    </div>
+  </div>
+  <div class="panel">
+    <div class="count" id="count">按查詢載入紀錄</div>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr>
+        <th>時間</th><th>班級</th><th>姓名</th><th>座號</th><th>關卡</th>
+        <th>第幾次</th><th>多畫</th><th>漏畫</th><th>作答圖</th>
+      </tr></thead>
+      <tbody id="rows"><tr><td colspan="9">尚無資料</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL="https://xkhlpjlrvbaocgoealbm.supabase.co", SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhraGxwamxydmJhb2Nnb2VhbGJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjQwNzQsImV4cCI6MjEwNzY0MDA3NH0.tbmjvpzu20S5HUmThdciV5x4tx9OQ-RFeRxCzqsg-lo";
+const W=12, H=10;
+const GIVENS={
+  1:{axis:"V",given:["4,2","4,3","4,4","5,2","5,4","6,2","6,3","6,4","3,3","3,4"]},
+  2:{axis:"H",given:["1,4","1,5","1,6","1,7","2,3","2,8","3,4","3,5","3,6","3,7","4,5","4,6"]},
+  3:{axis:"V",given:["2,3","3,3","3,4","4,3","4,4","4,5","5,3","6,3","6,4","7,2","7,3","2,4","5,4"]},
+  4:{axis:"V",given:["3,3","3,4","4,2","4,5","5,2","5,5","6,3","6,4"]},
+  5:{axis:"V",given:["2,3","2,4","3,2","3,5","4,2","4,3","4,4","4,5","5,3","5,4","6,4","7,3","7,4","7,5","3,3","3,4"]}
+};
+function mirror(rc,axis){
+  const p=rc.split(",").map(Number);
+  return axis==="V" ? p[0]+","+(W-1-p[1]) : (H-1-p[0])+","+p[1];
+}
+function answerOf(level){
+  const lv=GIVENS[level]; if(!lv) return new Set();
+  const s=new Set();
+  lv.given.forEach(g=>{ const m=mirror(g,lv.axis); if(!lv.given.includes(m)) s.add(m); });
+  return s;
+}
+if(sessionStorage.getItem("teacherOK")==="1") document.getElementById("gate").style.display="none";
+document.getElementById("pw").addEventListener("keydown",e=>{ if(e.key==="Enter") unlock(); });
+function unlock(){
+  if(document.getElementById("pw").value==="8888"){
+    sessionStorage.setItem("teacherOK","1");
+    document.getElementById("gate").style.display="none";
+    load();
+  }else document.getElementById("gateMsg").textContent="密碼錯誤，請找老師確認。";
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function localDay(iso){
+  const d=new Date(iso);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function localTime(iso){
+  const d=new Date(iso);
+  const p=n=>String(n).padStart(2,"0");
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+function miniGrid(level, cellsStr){
+  const lv=GIVENS[level];
+  const mine=new Set((cellsStr||"").split(";").filter(Boolean));
+  const ans=answerOf(level);
+  let html='<span class="mini">';
+  for(let r=0;r<H;r++) for(let c=0;c<W;c++){
+    const k=r+","+c;
+    let cls="";
+    if(lv && lv.given.includes(k)) cls="g";
+    else if(mine.has(k) && ans.has(k)) cls="s";
+    else if(mine.has(k)) cls="w";
+    else if(ans.has(k)) cls="m";
+    html+='<i class="'+cls+'"></i>';
+  }
+  return html+"</span>";
+}
+function clearF(){
+  document.getElementById("fClass").value="";
+  document.getElementById("fName").value="";
+  document.getElementById("fDate").value="";
+  load();
+}
+async function load(){
+  const fc=document.getElementById("fClass").value.trim();
+  const fn=document.getElementById("fName").value.trim();
+  const fd=document.getElementById("fDate").value;
+  const tb=document.getElementById("rows");
+  document.getElementById("count").textContent="載入中…";
+  try{
+    const res=await fetch(SB_URL+"/rest/v1/mistake_records?select=*&order=created_at.desc&limit=500",
+      {headers:{"apikey":SB_ANON,"Authorization":"Bearer "+SB_ANON}});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    let data=await res.json();
+    data=data.filter(r=>
+      (!fc || (r.class_name||"").includes(fc)) &&
+      (!fn || (r.student_name||"").includes(fn)) &&
+      (!fd || localDay(r.created_at)===fd));
+    document.getElementById("count").textContent="共 "+data.length+" 筆錯題紀錄";
+    if(!data.length){ tb.innerHTML='<tr><td colspan="9">沒有符合的紀錄</td></tr>'; return; }
+    tb.innerHTML=data.map(r=>"<tr><td>"+localTime(r.created_at)+"</td><td>"+esc(r.class_name||"—")+
+      "</td><td>"+esc(r.student_name)+"</td><td>"+esc(r.seat_no||"—")+"</td><td>第"+r.level+"關</td><td>"+
+      r.attempt_no+"</td><td>"+r.wrong_count+"</td><td>"+r.missing_count+"</td><td>"+
+      miniGrid(r.level, r.student_cells)+"</td></tr>").join("");
+  }catch(e){
+    document.getElementById("count").textContent="載入失敗，請檢查網路後重試。";
+  }
+}
+</script>
+</body>
+</html>
